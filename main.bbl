@@ -1,0 +1,16 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{abe04}
+Abe, M., Ohkubo, M., Suzuki, K.: 1-out-of-n signatures from a variety of keys.
+  {IEICE} Trans. Fundam. Electron. Commun. Comput. Sci.  \textbf{87-A}(1),
+  131--140 (2004),
+  \url{http://search.ieice.org/bin/summary.php?id=e87-a\_1\_131\&category=D\&year=2004\&lang=E\&abst=}
+
+\bibitem{dlep}
+Noether, S.: Mrl-0010: Dirscrete logarithm equality across groups. Tech. rep.,
+  Monero Research Lab (2018)
+
+\end{thebibliography}

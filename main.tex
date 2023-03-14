@@ -1,0 +1,131 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+% Other font encondings may result in incorrect characters.
+%
+\usepackage{graphicx}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+
+\usepackage{amsmath, amssymb}
+\usepackage{amsfonts}
+% \usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{color}
+%
+%%%%%%%%%%%%% end packages %%%%%%%%%%%%%%%%%%
+
+
+%%%% begin variables $$$$
+\newcommand{\funcname}[1]{\mathsf{#1}}
+\newcommand{\funcnametxt}[1]{$\funcname{#1}$}
+\newcommand{\getsrandom}{\overset{\tiny{\$}}{\leftarrow}}
+\newcommand{\seq}[2]{#1,\ldots,#2}
+\newcommand{\etal}{\textit{et al. }}
+\newcommand{\ggroup}{\mathbb{G}}
+\newcommand{\hgroup}{\mathbb{H}}
+\newcommand{\ggrouptxt}{$\mathbb{G}$ }
+\newcommand{\hgrouptxt}{$\mathbb{H}$ }
+\newcommand{\Zp}{\mathbb{Z}_p}
+\newcommand{\Zptxt}{$\mathbb{Z}_p$ }
+\newcommand{\Zq}{\mathbb{Z}_q}
+\newcommand{\Zqtxt}{$\mathbb{Z}_q$ }
+
+%%%% end variables $$$$
+\begin{document}
+%
+\title{A Survey of Three Atomic Swaps with Monero}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{F. Barb\`ara\inst{1}}
+% \author{First Author\inst{1}\orcidID{0000-1111-2222-3333} \and
+% Second Author\inst{2,3}\orcidID{1111-2222-3333-4444} \and
+% Third Author\inst{3}\orcidID{2222--3333-4444-5555}}
+%
+\authorrunning{F. Barb\`ara}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{
+    \email{me@fadibarbara.it}}
+% \institute{Princeton University, Princeton NJ 08544, USA \and
+% Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany
+% \email{lncs@springer.com}\\
+% \url{http://www.springer.com/gp/computer-science/lncs} \and
+% ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+% \email{\{abc,lncs\}@uni-heidelberg.de}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in
+150--250 words.
+
+\keywords{First keyword  \and Second keyword \and Another keyword.}
+\end{abstract}
+%
+%
+%
+\section{What is an Atomic Swap?}
+\section{First Section}
+\section{Building blocks}
+Three building blocks make atomic swaps from (respectively to Monero to (resp. from) other blockchain possible: a Discrete-Logarithm Equality Proof (DLEP), the use of Adaptor Signatures, and the use of view keys in the Monero blockchain.
+In the following we analyze these building blocks.
+
+\subsection{Discrete-Logarithm Equality Proof}\label{sec:dlep}
+
+All the presented atomic swaps methods leverage the use of the same private keys on both the Monero and the Bitcoin or Ethereum blockchain. On the one hand this is an efficient way to deal with the lack of scripts capabilities of Monero and it paves the way to the use of adaptor signatures (Section \ref{sec:adaptorsignatures}). On the other hand since Monero and Bitcoin (or Monero and Ethereum) do \emph{not} share the same curve proving equality of priva keys on two curves requires some non trivial work.
+
+All three atomic swap methods reference the technical note written by Noether \footnote{As written on the note the credit for the first presentation of the DLEP goes to Andrew Poelstra} \cite{dlep} as their base for the DLEP construction.
+
+While the technical note presents all the computational information needed ot perform a succesful DLEP, the note does not provide any theoreticla information. A formalization of the content of the note ca be foun in Appendix I of this work. In this section we just highlight the foundational steps.
+
+The Noether DLEP in \cite{dlep} is a non-interactive zero-knowledge proof of knowledge between two actors: Peggy (acting as the prover) and Victor (acting as the verifier). We assume that Peggy and Victor share the parameters of the two groups \ggrouptxt and \hgrouptxt, with points $G,G'\in\ggroup$ and $H,H' \in\hgroup$ generators of the respective froups. We also assume $|G|=p$ and $|H|=q$, with $p$ and $q$ prime numbers and $p<q$. The goal of Peggy is to provide two points $xG'\in\ggroup$ and $xH'\in\hgroup$, and a proof that $xG'$ and $xH'$ share the same descrete logarithm $x<p$\footnote{The definition of \emph{same} requires some more formal definition, which can be found in Appendix I\textbf{insert reference}.}. The proof is built in a three steps process.
+
+In the first step peggy splits $x$ into a bit sequence, and creates as manny ``blinders'' as the number of bits of $x$, for each group. Formally:
+\begin{enumerate}
+    \item $x=\sum_{i=0}^{n-1} 2^ib_i$
+    \item $r_0,\dots,r_{n-2}\getsrandom\Zp,\quad s_0,\dots,s_{n-2}\getsrandom\Zq$
+    \item $r_{n-1}=-(2^{n-1})^{-1}\sum_{i=0}^{n-2} 2^ir_i,\quad s_{n-1}=-(2^{n-1})^{-1}\sum_{i=0}^{n-2} 2^is_i$
+\end{enumerate}
+
+
+In the second step, Peggy creates Pedersen Commitments for each $(b_i,r_i)$ and $(b_i,s_i)$, for a total of $2n$ commitments:
+$$
+C_i^{\ggroup}=b_iG'+r_iG, \quad C_i^{\hgroup}=b_iH'+r_iH, \quad \forall i=\seq 0 {n-1}
+$$
+
+In the third step, Peggy creates $2n$ different Schnorr ring-signatures of the commitments: two signatures for each message $(C_i^{\ggroup}, C_i^{\hgroup})$, the first signed with $r_i$ and the second with $s_i$. The signing procedure derives from the work of Abe, Okhubo and Suzuki \cite{abe04}, and since a complete treatment and a comparison between the work done in \cite{dlep} and \cite{abe04} is provided in Appendix I\todo{insert reference}, we omit the details in this section. We just say that the proof $\pi$ is so composed:
+
+\begin{align}
+    \pi=(xG', xH', \{\sigma_i^{\ggroup}\}_{i=0}^{n-1}, \{\sigma_i^{\hgroup}\}_{i=0}^{n-1})
+\end{align}
+\noindent where $\{\sigma_i^{\ggroup}\}_{i=0}^{n-1}$ are the $n$ signatures of the commmitments using $r_i$.
+\subsection{Adaptor Signatures}\label{sec:adaptorsignatures}
+\subsection{View Keys}\label{sec:viewkeys}
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted in the correct style.
+%
+\bibliographystyle{splncs04}
+\bibliography{biblio}
+
+\section*{Appendix I}\label{apx:I}
+
+%
+\end{document}
