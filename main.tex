@@ -39,9 +39,22 @@
 \newcommand{\Zp}{\mathbb{Z}_p}
 \newcommand{\Zptxt}{$\mathbb{Z}_p$ }
 \newcommand{\Zq}{\mathbb{Z}_q}
+\newcommand{\maccount}{\mathfrak{a}}
+\newcommand{\mutxo}{\mathfrak{u}}
+\newcommand{\model}{\mathfrak{m}}
+\newcommand{\maccounttxt}{$\mathfrak{a}$}
+\newcommand{\mutxotxt}{$\mathfrak{u}$}
+\newcommand{\modeltxt}{$\mathfrak{m}$}
 \newcommand{\Zqtxt}{$\mathbb{Z}_q$ }
-
+\newcommand{\tx}[3]{<\mathfrak{#1}\,, [#2]\mapsto[#3]>}
+\newcommand{\curlybelow}[2]{\underbrace{#1}_{#2}}
+\newcommand{\curlyabove}[2]{\overbrace{#1}^{#2}}
 %%%% end variables $$$$
+
+%%%% begin environments $$$$
+\newtheorem{deff}{Definition}
+\newtheorem{thm}{Theorem}
+%%%% end environments $$$$
 \begin{document}
 %
 \title{A Survey of Three Atomic Swaps with Monero}
@@ -79,19 +92,56 @@ The abstract should briefly summarize the contents of the paper in
 %
 %
 %
-\section{What is an Atomic Swap?}
-\section{First Section}
+\section{Introduction}
+\label{sec_introduction}
+\textbf{insert intro}
+
+
+\subsection{Transactions}
+\label{sec_transactions}
+Before formally introduce atomic swaps, we give a definition of \emph{transaction}. By doing that we are able to make a precise comparison between different atomic swaps methods. Our definition of transaction is based on the notation introduced by Avarikioti \etal \cite{avarikioti19cerberus} and expanded by Nadahalli \etal \cite{nadahalli22grieffreeas}. Their method is structured for atomic swaps between blockchains that use a UTXO model. We expand it further to take into account the cases in which atomic swaps are performed between blockchains where at least one of them uses an Account model.
+
+\begin{deff}[Transaction]\label{def_transaction}
+    
+    A transaction is ....
+\end{deff}
+We now show that Definition \ref{def_transaction} is able to represent transaction both in  UTXO and in  Account model blockchains.
+
+The following transaction $T_j$:
+
+$$
+T_j = \tx u {\curlybelow{(2|\sigma_a)}{T_l},(3|\sigma_b,\Delta_{10})}{(1|\sigma_c),(4|\sigma_d)}
+$$
+is a transaction in the UTXO model whose first input $(2|\sigma_a)$ comes from transaction $T_l$, has an amount of $2$ coins and can be redeemed only using public key $A$; the second input $(3|\sigma_b,\Delta_{10})$ has an amount of $3$ coins and can be redeemed only using public key $B$ after at least $10$ from when it has been created, for a total of $5$ coins. We may omit the transaction from where an input comes from if it is not of interest. Moreover, the first output $o_u^1=(1|\sigma_c)$ can be redeemed with public key $C$ and similar reasoning goes for $o_u^2=(4|\sigma_d)$, for a total of $5$ coins redeemed.
+
+On the other hand the following transaction $T_k$:
+$$
+T_k = \tx a {(2|\texttt{0xba6d...de}}{(2|\texttt{0x32be...9a})}
+$$
+is a transaction in the account model which spends $2$ coins from address \texttt{0xba6d...de} to  address \texttt{0x32be...9a}.
+
+Transaction validity is intuitively obvious, but we give a formal definition to account to some differences between the two models.
+\begin{deff}[Valid Transaction]\label{def_transaction_validity}
+    
+    A transaction is valid when ....
+\end{deff}
+Note also that a transaction in the account model can be also a combination of multiple transactions. \todo{is it necessary??}
+
+
+\subsection{Atomic Swaps}
+\label{sec_atomic_swaps}
+
 \section{Building blocks}
 Three building blocks make atomic swaps from (respectively to Monero to (resp. from) other blockchain possible: a Discrete-Logarithm Equality Proof (DLEP), the use of Adaptor Signatures, and the use of view keys in the Monero blockchain.
 In the following we analyze these building blocks.
 
-\subsection{Discrete-Logarithm Equality Proof}\label{sec_dlep}
+\subsection{Discrete-Logarithm Equality Proof} \label{sec_dlep}
 
-All the presented atomic swaps methods leverage the use of the same private keys on both the Monero and the Bitcoin or Ethereum blockchain. On the one hand this is an efficient way to deal with the lack of scripts capabilities of Monero and it paves the way to the use of adaptor signatures (Section \ref{sec_adaptorsignatures}). On the other hand since Monero and Bitcoin (or Monero and Ethereum) do \emph{not} share the same curve proving equality of priva keys on two curves requires some non trivial work.
+All the presented atomic swaps methods leverage the use of the same private keys on both the Monero and the Bitcoin or Ethereum blockchain. On the one hand this is an efficient way to deal with the lack of scripts capabilities of Monero and it paves the way to the use of adaptor signatures (Section \ref{sec_adaptorsignatures}). On the other hand since Monero and Bitcoin (or Monero and Ethereum) do \emph{not} share the same curve proving equality of private keys on two curves requires some non trivial work.
 
 All three atomic swap methods reference the technical note written by Noether \footnote{As written on the note the credit for the first presentation of the DLEP goes to Andrew Poelstra} \cite{dlep} as their base for the DLEP construction.
 
-While the technical note presents all the computational information needed ot perform a succesful DLEP, the note does not provide any theoreticla information. A formalization of the content of the note ca be foun in Appendix I of this work. In this section we just highlight the foundational steps.
+While the technical note presents all the computational information needed to perform a successful DLEP, the note does not provide any theoretical information. A formalization of the content of the note ca be found in Appendix I of this work. In this section we just highlight the foundational steps.
 
 The Noether DLEP in \cite{dlep} is a non-interactive zero-knowledge proof of knowledge between two actors: Peggy (acting as the prover) and Victor (acting as the verifier). We assume that Peggy and Victor share the parameters of the two groups \ggrouptxt and \hgrouptxt, with points $G,G'\in\ggroup$ and $H,H' \in\hgroup$ generators of the respective froups. We also assume $|G|=p$ and $|H|=q$, with $p$ and $q$ prime numbers and $p<q$. The goal of Peggy is to provide two points $xG'\in\ggroup$ and $xH'\in\hgroup$, and a proof that $xG'$ and $xH'$ share the same descrete logarithm $x<p$\footnote{The definition of \emph{same} requires some more formal definition, which can be found in Appendix I\textbf{insert reference}.}. The proof is built in a three steps process.
 
